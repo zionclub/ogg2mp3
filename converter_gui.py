@@ -101,6 +101,10 @@ class OggToMp3Converter:
         self.lbl_status = ttk.Label(progress_frame, textvariable=self.status_var)
         self.lbl_status.pack(anchor=tk.W)
 
+        self.log_var = tk.StringVar(value="")
+        self.lbl_log = ttk.Label(progress_frame, textvariable=self.log_var, font=("Consolas", 8), foreground="gray")
+        self.lbl_log.pack(anchor=tk.W)
+
         # Botão Converter
         self.btn_convert = ttk.Button(bottom_frame, text="Converter", command=self.start_conversion)
         self.btn_convert.pack(side=tk.RIGHT, padx=(10, 0))
