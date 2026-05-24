@@ -1,0 +1,10 @@
+# Ignore binaries and build artifacts for Gemini
+dist/
+build/
+*.exe
+*.bin
+*.spec
+__pycache__/
+.git/
+venv/
+.venv/
