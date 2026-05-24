@@ -21,6 +21,10 @@ wheels/
 .installed.cfg
 *.egg
 
+# Allow only the main executable
+!Ogg2Mp3Converter.exe
+!dist/Ogg2Mp3Converter.exe
+
 # PyInstaller
 #  Usually these files are written by a python script, and contain the binarized
 #  version of a python script
@@ -97,7 +101,6 @@ ENV/
 
 # FFmpeg (if binaries are placed in root)
 ffmpeg
+ffmpeg.exe
 ffprobe
-
-obe
 ffprobe.exe
