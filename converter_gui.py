@@ -13,7 +13,6 @@ class OggToMp3Converter:
         self.root.geometry("800x600")
         
         self.input_files = []
-        self.input_dir = tk.StringVar(value="Não selecionado")
         self.output_dir = tk.StringVar(value="Não selecionado")
         self.sort_option = tk.StringVar(value="name")
         
@@ -44,9 +43,6 @@ class OggToMp3Converter:
         
         btn_select_files = ttk.Button(left_selection, text="Selecionar Arquivos .ogg", command=self.select_files)
         btn_select_files.pack(side=tk.TOP, anchor=tk.W)
-        
-        lbl_input = ttk.Label(left_selection, textvariable=self.input_dir, wraplength=350, foreground="gray")
-        lbl_input.pack(side=tk.TOP, anchor=tk.W, pady=(5, 0))
 
         # Direita: Selecionar Saída
         right_selection = ttk.Frame(top_frame)
@@ -58,25 +54,29 @@ class OggToMp3Converter:
         lbl_output = ttk.Label(right_selection, textvariable=self.output_dir, wraplength=350, foreground="gray")
         lbl_output.pack(side=tk.TOP, anchor=tk.E, pady=(5, 0))
 
-        # Painéis Centrais (Listas)
+        # Painel Central (Lista Única)
         lists_frame = ttk.Frame(main_frame)
         lists_frame.pack(fill=tk.BOTH, expand=True)
 
-        # Lista de Entrada (Esquerda)
-        left_list_frame = ttk.Frame(lists_frame)
-        left_list_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 5))
-        ttk.Label(left_list_frame, text="Arquivos de Origem").pack(anchor=tk.W)
+        ttk.Label(lists_frame, text="Arquivos Selecionados (Ordem de Conversão)").pack(anchor=tk.W)
         
-        self.listbox_input = tk.Listbox(left_list_frame, selectmode=tk.EXTENDED)
+        # Scrollbar para a lista
+        scrollbar_y = ttk.Scrollbar(lists_frame, orient=tk.VERTICAL)
+        scrollbar_x = ttk.Scrollbar(lists_frame, orient=tk.HORIZONTAL)
+        
+        self.listbox_input = tk.Listbox(
+            lists_frame, 
+            selectmode=tk.EXTENDED, 
+            yscrollcommand=scrollbar_y.set,
+            xscrollcommand=scrollbar_x.set
+        )
+        
+        scrollbar_y.config(command=self.listbox_input.yview)
+        scrollbar_x.config(command=self.listbox_input.xview)
+        
+        scrollbar_y.pack(side=tk.RIGHT, fill=tk.Y)
+        scrollbar_x.pack(side=tk.BOTTOM, fill=tk.X)
         self.listbox_input.pack(fill=tk.BOTH, expand=True)
-        
-        # Lista de Preview (Direita)
-        right_list_frame = ttk.Frame(lists_frame)
-        right_list_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(5, 0))
-        ttk.Label(right_list_frame, text="Preview de Saída").pack(anchor=tk.W)
-        
-        self.listbox_preview = tk.Listbox(right_list_frame)
-        self.listbox_preview.pack(fill=tk.BOTH, expand=True)
 
         # Painel Inferior (Controles e Progresso)
         bottom_frame = ttk.Frame(main_frame)
@@ -115,9 +115,6 @@ class OggToMp3Converter:
             filetypes=[("Arquivos OGG", "*.ogg")]
         )
         if files:
-            # Atualiza diretório de entrada (baseado no primeiro arquivo)
-            self.input_dir.set(os.path.dirname(files[0]))
-            
             # Armazenamos o path completo e a data de modificação
             self.input_files = []
             for f in files:
@@ -134,7 +131,7 @@ class OggToMp3Converter:
             self.output_dir.set(directory)
 
     def update_lists(self):
-        """Ordena a lista e atualiza o preview."""
+        """Ordena a lista e atualiza a interface."""
         if not self.input_files:
             return
 
@@ -144,20 +141,14 @@ class OggToMp3Converter:
         else:
             self.input_files.sort(key=lambda x: x['mtime'])
 
-        # Atualiza Listbox de Entrada
+        # Atualiza Listbox
         self.listbox_input.delete(0, tk.END)
         num_files = len(self.input_files)
         digits = len(str(num_files))
         
         for i, f in enumerate(self.input_files, 1):
-            self.listbox_input.insert(tk.END, f"{i:0{digits}d}: {f['name']}")
-
-        # Atualiza Listbox de Preview (Renomeação Sequencial)
-        self.listbox_preview.delete(0, tk.END)
-        
-        for i in range(1, num_files + 1):
-            new_name = f"{i:0{digits}d}.mp3"
-            self.listbox_preview.insert(tk.END, new_name)
+            # Formato: 01: C:\diretorio\arquivo.ogg
+            self.listbox_input.insert(tk.END, f"{i:0{digits}d}: {f['path']}")
         
         self.status_var.set(f"{num_files} arquivos prontos para conversão.")
 
