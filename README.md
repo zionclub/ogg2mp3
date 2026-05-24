@@ -5,35 +5,26 @@ A modern, simple, and efficient audio converter developed in Python to transform
 ## 🚀 Features
 
 - **Intuitive Graphical Interface:** Single-list layout with full paths and sequential numbering for total control before conversion.
+- **Native Conversion:** Uses professional audio libraries (`soundfile` & `lameenc`) for high-fidelity conversion, bypassing FFmpeg's metadata issues.
 - **Multiple Selection:** Add as many `.ogg` files as you want at once.
 - **Smart Sorting:** Organize your files by **Name** (alphabetical order) or **Date** (modification date).
-- **Sequential Renaming (Leading Zeros):** Output files are automatically renamed in numbered format (e.g., `01.mp3`, `02.mp3`). The program automatically calculates the number of leading zeros based on the total volume of files (e.g., if there are 100 files, it will start at `001.mp3`).
-- **Background Processing (Threading):** Conversion doesn't freeze the interface. You can track real-time progress through the progress bar and detailed logs.
-- **Dependency Check:** Automatic alert if FFmpeg is not detected on the system.
+- **Sequential Renaming (Leading Zeros):** Output files are automatically renamed in numbered format (e.g., `01.mp3`, `02.mp3`).
+- **Background Processing (Threading):** Conversion doesn't freeze the interface.
 
 ## 🛠️ Prerequisites
 
 To use this program, you will need:
 
 1.  **Python 3.10+**: [Download Python](https://www.python.org/downloads/)
-2.  **FFmpeg**: The conversion engine used by this program.
-    - **Windows:**
-        - **Via CLI (Recommended):**
-          ```powershell
-          # Using Winget (Native to Windows 10/11)
-          winget install ffmpeg
-          
-          # Using Chocolatey
-          choco install ffmpeg
-          ```
-        - **Manual:** Download from [ffmpeg.org](https://ffmpeg.org/download.html), extract and add the `bin` folder to your system PATH.
-    - **Linux (Ubuntu/Debian):** `sudo apt install ffmpeg`
-    - **macOS:** `brew install ffmpeg`
+2.  **Dependencies**:
+    ```bash
+    pip install soundfile lameenc numpy
+    ```
 
 ## 📦 Installation and Usage
 
 1.  Clone this repository or download the files.
-2.  Open the terminal in the project folder.
+2.  Install the required dependencies: `pip install soundfile lameenc numpy`
 3.  Run the program:
     ```bash
     python converter_gui.py

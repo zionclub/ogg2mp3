@@ -1,32 +1,23 @@
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 import os
-import subprocess
 import threading
-import shutil
+import soundfile as sf
+import lameenc
+import numpy as np
 from datetime import datetime
 
 class OggToMp3Converter:
     def __init__(self, root):
         self.root = root
-        self.root.title("Conversor OGG para MP3")
+        self.root.title("Conversor OGG para MP3 (Native)")
         self.root.geometry("800x600")
         
         self.input_files = []
         self.output_dir = tk.StringVar(value="Não selecionado")
         self.sort_option = tk.StringVar(value="name")
         
-        self.check_ffmpeg()
         self.setup_ui()
-
-    def check_ffmpeg(self):
-        """Verifica se o ffmpeg está no PATH."""
-        if shutil.which("ffmpeg") is None:
-            messagebox.showerror(
-                "Erro de Dependência",
-                "O executável 'ffmpeg' não foi encontrado no sistema.\n\n"
-                "Por favor, instale o FFmpeg e adicione-o ao PATH para usar este programa."
-            )
 
     def setup_ui(self):
         # Frame Principal
@@ -160,10 +151,6 @@ class OggToMp3Converter:
         if self.output_dir.get() == "Não selecionado":
             messagebox.showwarning("Aviso", "Selecione um diretório de saída.")
             return
-        
-        if shutil.which("ffmpeg") is None:
-            messagebox.showerror("Erro", "FFmpeg não encontrado. Não é possível converter.")
-            return
 
         # Desabilita botões durante conversão
         self.btn_convert.config(state=tk.DISABLED)
@@ -184,40 +171,39 @@ class OggToMp3Converter:
             output_path = os.path.join(out_dir, output_filename)
 
             self.status_var.set(f"Convertendo {i} de {num_files}: {file_info['name']}...")
+            self.log_var.set(f"De: {input_path}\nPara: {output_path}")
             self.progress_var.set((i / num_files) * 100)
             
-            # Configuração para esconder a janela do console no Windows
-            startupinfo = None
-            if os.name == 'nt':
-                startupinfo = subprocess.STARTUPINFO()
-                startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-                startupinfo.wShowWindow = 0 # SW_HIDE
-
-            # Comando FFmpeg
             try:
-                # -y: Sobrescrever
-                # -nostdin: Evita que o FFmpeg pare prematuramente em background
-                # -fflags +genpts: Gera novos timestamps ignorando os metadados quebrados do OGG (corrige truncamento)
-                # -i: Input
-                # -c:a libmp3lame: Força o encoder LAME explicitamente
-                # -q:a 2: Qualidade VBR (~190kbps)
-                subprocess.run(
-                    [
-                        "ffmpeg", "-y", "-nostdin", 
-                        "-fflags", "+genpts", 
-                        "-i", input_path, 
-                        "-c:a", "libmp3lame", 
-                        "-q:a", "2", 
-                        output_path
-                    ],
-                    check=True,
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL,
-                    startupinfo=startupinfo
-                )
-            except subprocess.CalledProcessError as e:
-                print(f"Erro ao converter {file_info['name']}.")
-                # Poderíamos mostrar um erro aqui, mas vamos continuar para os próximos.
+                # 1. Lê o arquivo OGG usando soundfile (mais robusto com Opus/WhatsApp)
+                data, samplerate = sf.read(input_path)
+                
+                # Identifica canais
+                if data.ndim == 1:
+                    channels = 1
+                else:
+                    channels = data.shape[1]
+
+                # Converte Float (-1.0 a 1.0) para Int16 (PCM)
+                # O lameenc exige dados em bytes PCM
+                pcm_data = np.clip(data * 32767, -32768, 32767).astype(np.int16).tobytes()
+
+                # 2. Configura o encoder LAME nativo
+                encoder = lameenc.Encoder()
+                encoder.set_bit_rate(192) 
+                encoder.set_in_sample_rate(samplerate)
+                encoder.set_channels(channels)
+                encoder.set_quality(2) # Alta qualidade
+                
+                # 3. Codifica e salva o arquivo final
+                mp3_data = encoder.encode(pcm_data)
+                mp3_data += encoder.flush()
+                
+                with open(output_path, 'wb') as f:
+                    f.write(mp3_data)
+                    
+            except Exception as e:
+                print(f"Erro ao converter {file_info['name']}: {e}")
 
         self.status_var.set("Conversão concluída!")
         self.progress_var.set(100)
