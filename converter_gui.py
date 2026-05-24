@@ -39,17 +39,17 @@ class OggToMp3Converter:
 
         # Esquerda: Selecionar Arquivos
         left_selection = ttk.Frame(top_frame)
-        left_selection.pack(side=tk.LEFT, fill=tk.X, expand=True)
+        left_selection.pack(side=tk.LEFT, fill=tk.Y, expand=True)
         
         btn_select_files = ttk.Button(left_selection, text="Selecionar Arquivos .ogg", command=self.select_files)
-        btn_select_files.pack(side=tk.TOP, anchor=tk.W)
+        btn_select_files.pack(side=tk.TOP, anchor=tk.NW)
 
         # Direita: Selecionar Saída
         right_selection = ttk.Frame(top_frame)
-        right_selection.pack(side=tk.RIGHT, fill=tk.X, expand=True)
+        right_selection.pack(side=tk.RIGHT, fill=tk.Y, expand=True)
         
         btn_select_output = ttk.Button(right_selection, text="Selecionar Diretório de Saída", command=self.select_output)
-        btn_select_output.pack(side=tk.TOP, anchor=tk.E)
+        btn_select_output.pack(side=tk.TOP, anchor=tk.NE)
         
         lbl_output = ttk.Label(right_selection, textvariable=self.output_dir, wraplength=350, foreground="gray")
         lbl_output.pack(side=tk.TOP, anchor=tk.E, pady=(5, 0))
