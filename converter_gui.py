@@ -197,15 +197,15 @@ class OggToMp3Converter:
             try:
                 # -y: Sobrescrever
                 # -nostdin: Evita que o FFmpeg pare prematuramente em background
+                # -fflags +genpts: Gera novos timestamps ignorando os metadados quebrados do OGG (corrige truncamento)
                 # -i: Input
-                # -async 1: Corrige metadados de tempo (evita truncar final)
                 # -c:a libmp3lame: Força o encoder LAME explicitamente
                 # -q:a 2: Qualidade VBR (~190kbps)
                 subprocess.run(
                     [
                         "ffmpeg", "-y", "-nostdin", 
+                        "-fflags", "+genpts", 
                         "-i", input_path, 
-                        "-async", "1", 
                         "-c:a", "libmp3lame", 
                         "-q:a", "2", 
                         output_path
