@@ -191,6 +191,13 @@ class OggToMp3Converter:
             self.status_var.set(f"Convertendo {i} de {num_files}: {file_info['name']}...")
             self.progress_var.set((i / num_files) * 100)
             
+            # Configuração para esconder a janela do console no Windows
+            startupinfo = None
+            if os.name == 'nt':
+                startupinfo = subprocess.STARTUPINFO()
+                startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+                startupinfo.wShowWindow = 0 # SW_HIDE
+
             # Comando FFmpeg
             try:
                 # -y: Sobrescrever
@@ -199,7 +206,8 @@ class OggToMp3Converter:
                 subprocess.run(
                     ["ffmpeg", "-y", "-i", input_path, "-q:a", "2", output_path],
                     check=True,
-                    capture_output=True
+                    capture_output=True,
+                    startupinfo=startupinfo
                 )
             except subprocess.CalledProcessError as e:
                 print(f"Erro ao converter {file_info['name']}: {e.stderr.decode()}")
