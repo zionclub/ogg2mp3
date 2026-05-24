@@ -196,16 +196,18 @@ class OggToMp3Converter:
             # Comando FFmpeg
             try:
                 # -y: Sobrescrever
+                # -nostdin: Evita que o FFmpeg pare prematuramente em background
                 # -i: Input
                 # -q:a 2: Qualidade VBR (~190kbps)
                 subprocess.run(
-                    ["ffmpeg", "-y", "-i", input_path, "-q:a", "2", output_path],
+                    ["ffmpeg", "-y", "-nostdin", "-i", input_path, "-q:a", "2", output_path],
                     check=True,
-                    capture_output=True,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
                     startupinfo=startupinfo
                 )
             except subprocess.CalledProcessError as e:
-                print(f"Erro ao converter {file_info['name']}: {e.stderr.decode()}")
+                print(f"Erro ao converter {file_info['name']}.")
                 # Poderíamos mostrar um erro aqui, mas vamos continuar para os próximos.
 
         self.status_var.set("Conversão concluída!")
