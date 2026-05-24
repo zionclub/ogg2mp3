@@ -97,6 +97,7 @@ ENV/
 
 # FFmpeg (if binaries are placed in root)
 ffmpeg
-ffmpeg.exe
 ffprobe
+
+obe
 ffprobe.exe
